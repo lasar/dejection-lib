@@ -1,6 +1,6 @@
-var despair = function(config) {
+var dejection = function(config) {
 	var self = base(false);
-	self.name = 'despair';
+	self.name = 'dejection';
 	self.config = {
 		// width
 		// height
@@ -48,12 +48,12 @@ var despair = function(config) {
 				case 'function':
 					type = typeof(self.config[key]);
 					if(type!=self.requiredConfig[key]) {
-						self.log('despair.validateConfig: Configuration "'+key+'" is required and must be "'+self.requiredConfig[key]+'" but is "'+type+'" instead.');
+						self.log('dejection.validateConfig: Configuration "'+key+'" is required and must be "'+self.requiredConfig[key]+'" but is "'+type+'" instead.');
 						ok = false;
 					}
 					break;
 				default:
-					self.log('despair.validateConfig: "'+self.requiredConfig[key]+'" is unknown format for configuration "'+key+'"');
+					self.log('dejection.validateConfig: "'+self.requiredConfig[key]+'" is unknown format for configuration "'+key+'"');
 					ok = false;
 					break;
 			}
