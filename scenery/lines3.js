@@ -82,19 +82,21 @@ var scenery_lines3 = function(parent) {
 	self.drawLine = function(line) {
 		var end = self.getLineEnd(line);
 
+		var widthEnd = self.getLineEnd({
+			x: 0,
+			y: 0,
+			length: line.width/1,
+			angle: line.angle+90
+		});
+
 		var lineLength = Math.sqrt( (line.x-end.x)*(line.x-end.x)+(line.y-end.y)*(line.y-end.y) );
+		var lineWidthLength = Math.sqrt( (-widthEnd.x)*(-widthEnd.x)+(-widthEnd.y)*(-widthEnd.y) );
 		for(var i=0; i<lineLength; i++) {
 			self.set(x, y, 1);
-			for(var w=0; w<line.width; w++) {
-				var widthEnd = self.getLineEnd({
-					x: 0,
-					y: 0,
-					length: w,
-					angle: line.angle+90
-				});
-				var x = Math.round(line.x+(end.x-line.x)*i/lineLength);
-				var y = Math.round(line.y+(end.y-line.y)*i/lineLength);
-				self.set(x+widthEnd.x, y+widthEnd.y, 1);
+			for(var w=0; w<lineWidthLength; w++) {
+				var x = Math.round(line.x+(end.x-line.x)*i/lineLength) + Math.round((widthEnd.x)*w/lineWidthLength);
+				var y = Math.round(line.y+(end.y-line.y)*i/lineLength) + Math.round((widthEnd.y)*w/lineWidthLength);
+				self.set(x, y, 1);
 			}
 		}
 	};
