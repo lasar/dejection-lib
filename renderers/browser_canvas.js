@@ -296,27 +296,18 @@ var renderer_browserCanvas = function(parent) {
 	};
 
 	self.reset = function() {
-		self.changeCache = [{x:0, y:0, width:self.parent.config.width, height:self.parent.config.height}];
+		self.resetChangeCache();
+		self.addToChangeCache(0, 0, self.parent.config.width, self.parent.config.height);
 	};
 
 	self.render = function() {
-
-		for(var c in self.changeCache) {
-			var cc = self.changeCache[c];
+		self.changeCacheLoop(function(change) {
 			self.parent.scenery.loop(function(x, y, mask, color) {
-				// self.set(x, y, {r:255, g:0, b:0, a:255});
 				self.set(x, y, color);
-			}, false, cc.x, cc.y, cc.width, cc.height);
-		}
+			}, false, change.x, change.y, change.width, change.height);
+		});
 
-		// Scenery
-		// self.parent.scenery.loop(function(x, y, mask, color) {
-		// 	self.set(x, y, color);
-		// });
-
-		self.changeCache = [];
-		// self.changeCache = [{x:0, y:0, width:self.parent.config.width, height:self.parent.config.height}];
-		// self.changeCache = [{x:200, y:200, width:1, height:1}];
+		self.resetChangeCache();
 
 		// Agonists
 		for(var a in self.parent.agonists) {
@@ -326,6 +317,34 @@ var renderer_browserCanvas = function(parent) {
 		self.ctx.putImageData(self.imageData, 0, 0);
 	};
 
+	self.addToChangeCache = function(x, y, w, h, lifetime) {
+		if(lifetime=='undefined') {
+			lifetime = 1;
+		}
+		self.changeCache.push({
+			x: x-10,
+			y: y-10,
+			width: w+20,
+			height: h+20,
+			lifetime: lifetime
+		});
+	};
+
+	self.resetChangeCache = function() {
+		self.changeCache = [];
+	};
+
+	self.changeCacheLoop = function(callback) {
+		for(var c in self.changeCache) {
+			callback(self.changeCache[c]);
+			self.changeCache[c].lifetime--;
+			if(self.changeCache[c].lifetime<1) {
+				delete(self.changeCache[c]);
+			}
+		}
+		
+	};
+
 	self.addBitmap = function(bitmap, left, top, color) {
 		var width = bitmap[0].length;
 		var height = bitmap.length;
@@ -333,16 +352,30 @@ var renderer_browserCanvas = function(parent) {
 			for(y=0; y<height; y++) {
 				p = bitmap[y][x];
 				if(p.a!=0) {
-					self.set(left+x, top+y, p);
+					self.toggle(left+x, top+y);
 				}
 			}
 		}
+		self.addToChangeCache(left, top, width, height);
 	}
 
 	self.addAgonist = function(agonist) {
 		self.addBitmap(agonist.getBitmap(), Math.round(agonist.x), Math.round(agonist.y));
-		self.changeCache.push({x:agonist.x, y:agonist.y, width:agonist.width, height:agonist.height, agonist:agonist.name});
 		// self.debug && self.write(agonist.x+agonist.width+2, agonist.y+agonist.height-self.text.charHeight, agonist.physics.speedX+'x'+agonist.physics.dirX+'/'+agonist.physics.speedY+'x'+agonist.physics.dirY, {r:255, g:0, b:0, a:255});
+	}
+
+	self.toggle = function(x, y) {
+		// Note: This assumes a b/w world. Color is ignored.
+		if(x>=0 && x<self.imageData.width && y>=0 && y<self.imageData.height) {
+			var index = (x + y * self.imageData.width) * 4;
+			if(self.imageData.data[index]>0) {
+				self.set(x, y, 1);
+			} else {
+				self.set(x, y, 0);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	self.set = function(x, y, color) {

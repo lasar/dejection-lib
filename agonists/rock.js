@@ -39,8 +39,7 @@ var agonist_rock = function(parent) {
 	}
 
 	self.stopY = function() {
-		self.parent.scenery.addBitmap(self.mask, self.bitmap, self.x, self.y);
-		self.remove();
+		self.toScenery();
 	}
 
 	return self;

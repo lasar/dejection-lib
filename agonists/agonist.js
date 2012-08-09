@@ -112,5 +112,10 @@ var agonist = function(parent) {
 		self.dying = true;
 	}
 
+	self.toScenery = function() {
+		self.parent.scenery.addBitmap(self.mask, self.bitmap, self.x, self.y);
+		self.remove();
+	}
+
 	return self;
 }

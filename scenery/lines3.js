@@ -2,117 +2,102 @@ var scenery_lines3 = function(parent) {
 	var self = scenery(parent);
 	self.name = 'scenery_lines3';
 
-	self.sizeFactor = 4;
-
-	self.lineMinWidth = 3;
-	self.lineMaxWidth = 3;
+	self.lineWidth = 4;
 	self.lineMinLength = 20;
-	self.lineMaxLength = 100;
-	self.lineMinInclination = -0.5;
-	self.lineMaxInclination = 0.5;
+	self.lineMaxLength = 60;
 
-	self.minLinesInSet = 4;
-	self.maxLinesInSet = 4;
+	self.smallAngle = 20;
+	self.bigAngle = 60;
+	self.verticalAngle = 90;
+
+	self.corridorHeight = 100;
+	self.corridorSpacing = 25;
 
 	self.generate = function() {
 		self.initialize();
 
-		self.sizeFactor = ((self.parent.config.width*self.parent.config.height)/40000);
-
-		self.drawLine({
-			x: 100,
-			y: 200,
-			length: 100,
-			deg: 0,
-			width: 4,
-		});
-
-		self.drawLine({
-			x: 250,
-			y: 200,
-			length: 100,
-			deg: 90,
-			width: 4,
-		});
-
-		self.drawLine({
-			x: 400,
-			y: 200,
-			length: 100,
-			deg: 45,
-			width: 4,
-		});
-
-		// self.inventLines();
-		// self.drawLines();
+		var corridorCount = Math.ceil(self.parent.config.height / self.corridorHeight);
+		for(var c=0; c<corridorCount; c++) {
+			var cTop = (c*self.corridorHeight) + self.corridorSpacing;
+			var cBottom = (c+1)*self.corridorHeight;
+			self.drawCorridor(cTop, cBottom);
+		}
 	}
 
-	self.inventLines = function() {
-		var lineSets = self.rnd(Math.round(self.sizeFactor/2), self.sizeFactor);
-
-		self.data = [];
-
-		var lineSet, line;
-
-		for(var ls=0; ls<lineSets; ls++) {
-			lineSet = {};
-			lineSet.startX = self.rnd(0, self.parent.config.width-Math.round(self.lineMaxLength/2));
-			lineSet.startY = self.rnd(0, self.parent.config.height);
-			lineSet.lines = [];
-
-			linesInSet = self.rnd(self.minLinesInSet, self.maxLinesInSet);
-
-			for(var lis=0; lis<linesInSet; lis++) {
-				line = {
-					// x
-					// y
-					length: self.rnd(self.lineMinLength, self.lineMaxLength),
-					inclination: self.rnd(self.lineMinInclination, self.lineMaxInclination, true),
-					width: self.rnd(self.lineMinWidth, self.lineMaxWidth),
-				};
-				
-				lineSet.lines.push(line);
+	self.drawCorridor = function(topY, bottomY) {
+		var left = 0;
+		var top = topY+Math.round((bottomY-topY)/2);
+		while(left<self.parent.config.width) {
+			var typeProbabilities = [
+				60, // 0: small angles
+				10, // 1: big angles
+				10, // 2: vertical
+				20 // 3: empty
+			];
+			var typeSum = 0;
+			var types = [];
+			for(var t=0; t<typeProbabilities.length; t++) {
+				typeSum += typeProbabilities[t];
+				for(var tt=0; tt<typeProbabilities[t]; tt++) {
+					types.push(t);
+				}
 			}
-
-			self.data.push(lineSet);
+			var typeNum = self.rnd(0, typeSum-1);
+			var type = 0;
+			var draw = true;
+			switch(types[typeNum]) {
+				case 0: var angle = self.rnd(-self.smallAngle, self.smallAngle); break;
+				case 1: var angle = self.rnd(-self.bigAngle, self.bigAngle); break;
+				case 2: var angle = self.rnd(0, 1) ? self.verticalAngle : -self.verticalAngle; break;
+				case 3: var angle = 0; draw = false; break;
+			}
+			var line = {
+				x: left,
+				y: top,
+				length: self.rnd(self.lineMinLength, self.lineMaxLength),
+				angle: angle,
+				width: self.lineWidth
+			};
+			var end = self.getLineEnd(line);
+			if(end.y>=topY && end.y<=bottomY) {
+				if(draw) {
+					self.drawLine(line);
+				}
+				left = end.x;
+				top = end.y;
+			}
 		}
 	};
 
-	self.drawLines = function() {
-		var ls, lis, x, y;
-		for(var lsKey in self.data) {
-			ls = self.data[lsKey];
-			x = ls.startX;
-			y = ls.startY;
-			for(var lisKey in ls.lines) {
-				lis = ls.lines[lisKey];
-				lis.x = x;
-				lis.y = y;
-				self.drawLine(lis);
-				x += lis.length;
-				y += (lis.length*lis.inclination);
-			}
-		}
+	self.getLineEnd = function(line) {
+		var angle = (line.angle+90) / (360/(Math.PI*2));
+		var end = {
+			angle: angle,
+			x: Math.round(line.x + (Math.sin(angle)*line.length)),
+			y: Math.round(line.y + (Math.cos(angle)*line.length))
+		};
+		return end;
 	};
 
 	self.drawLine = function(line) {
-		for(var w=0; w<line.width; w++) {
-			self.set(line.x, line.y+w, 1);
+		var end = self.getLineEnd(line);
+
+		var lineLength = Math.sqrt( (line.x-end.x)*(line.x-end.x)+(line.y-end.y)*(line.y-end.y) );
+		for(var i=0; i<lineLength; i++) {
+			self.set(x, y, 1);
+			for(var w=0; w<line.width; w++) {
+				var widthEnd = self.getLineEnd({
+					x: 0,
+					y: 0,
+					length: w,
+					angle: line.angle+90
+				});
+				var x = Math.round(line.x+(end.x-line.x)*i/lineLength);
+				var y = Math.round(line.y+(end.y-line.y)*i/lineLength);
+				self.set(x+widthEnd.x, y+widthEnd.y, 1);
+			}
 		}
-
-		var x = Math.round(line.length * Math.cos(line.deg));
-		var y = Math.round(line.length * Math.sin(line.deg));
-
-		for(var w=0; w<line.width; w++) {
-			self.set(x, y+w, 1);
-		}
-
-		// for(var x=0; x<line.length; x++) {
-		// 	for(var w=0; w<line.width; w++) {
-		// 		self.set(line.x+x, Math.round(line.y+(x*line.inclination))+w, 1);
-		// 	}
-		// }
-	}
+	};
 
 	return self;
 };
