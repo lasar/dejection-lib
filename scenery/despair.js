@@ -1,6 +1,6 @@
-var scenery_lines3 = function(parent) {
+var scenery_despair = function(parent) {
 	var self = scenery(parent);
-	self.name = 'scenery_lines3';
+	self.name = 'scenery_despair';
 
 	self.lineWidth = 4;
 	self.lineMinLength = 20;
