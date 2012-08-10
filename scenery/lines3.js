@@ -92,10 +92,11 @@ var scenery_lines3 = function(parent) {
 		var lineLength = Math.sqrt( (line.x-end.x)*(line.x-end.x)+(line.y-end.y)*(line.y-end.y) );
 		var lineWidthLength = Math.sqrt( (-widthEnd.x)*(-widthEnd.x)+(-widthEnd.y)*(-widthEnd.y) );
 		for(var i=0; i<lineLength; i++) {
-			self.set(x, y, 1);
 			for(var w=0; w<lineWidthLength; w++) {
-				var x = Math.round(line.x+(end.x-line.x)*i/lineLength) + Math.round((widthEnd.x)*w/lineWidthLength);
-				var y = Math.round(line.y+(end.y-line.y)*i/lineLength) + Math.round((widthEnd.y)*w/lineWidthLength);
+				// var x = Math.round(line.x+(end.x-line.x)*i/lineLength) + Math.round((widthEnd.x)*w/lineWidthLength);
+				// var y = Math.round(line.y+(end.y-line.y)*i/lineLength) + Math.round((widthEnd.y)*w/lineWidthLength);
+				var x = Math.round(line.x+(end.x-line.x)*i/lineLength);
+				var y = Math.round(line.y+(end.y-line.y)*i/lineLength);
 				self.set(x, y, 1);
 			}
 		}
