@@ -23,6 +23,8 @@ var agonist_rock = function(parent) {
 
 	self.setBitmap(rockBitmap, rockBitmap);
 
+	self.mass = 10;
+
 	self.setup = function(options) {
 		self.setupBase(options);
 		if(self.x==-1) {

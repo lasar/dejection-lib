@@ -25,40 +25,40 @@ var scenery_despair = function(parent) {
 	}
 
 	self.drawCorridor = function(topY, bottomY) {
+		var typeProbabilities = [
+			60, // 0: small angles
+			10, // 1: big angles
+			10, // 2: vertical
+			20 // 3: empty
+		];
+		var typeSum = 0;
+		var types = [];
+		for(var t=0; t<typeProbabilities.length; t++) {
+			typeSum += typeProbabilities[t];
+			for(var tt=0; tt<typeProbabilities[t]; tt++) {
+				types.push(t);
+			}
+		}
 		var left = 0;
 		var top = topY+Math.round((bottomY-topY)/2);
+		var typeNum, draw, angle, line, end;
 		while(left<self.parent.config.width) {
-			var typeProbabilities = [
-				60, // 0: small angles
-				10, // 1: big angles
-				10, // 2: vertical
-				20 // 3: empty
-			];
-			var typeSum = 0;
-			var types = [];
-			for(var t=0; t<typeProbabilities.length; t++) {
-				typeSum += typeProbabilities[t];
-				for(var tt=0; tt<typeProbabilities[t]; tt++) {
-					types.push(t);
-				}
-			}
-			var typeNum = self.rnd(0, typeSum-1);
-			var type = 0;
-			var draw = true;
+			typeNum = self.rnd(0, typeSum-1);
+			draw = true;
 			switch(types[typeNum]) {
-				case 0: var angle = self.rnd(-self.smallAngle, self.smallAngle); break;
-				case 1: var angle = self.rnd(-self.bigAngle, self.bigAngle); break;
-				case 2: var angle = self.rnd(0, 1) ? self.verticalAngle : -self.verticalAngle; break;
-				case 3: var angle = 0; draw = false; break;
+				case 0: angle = self.rnd(-self.smallAngle, self.smallAngle); break;
+				case 1: angle = self.rnd(-self.bigAngle, self.bigAngle); break;
+				case 2: angle = self.rnd(0, 1) ? self.verticalAngle : -self.verticalAngle; break;
+				case 3: angle = 0; draw = false; break;
 			}
-			var line = {
+			line = {
 				x: left,
 				y: top,
 				length: self.rnd(self.lineMinLength, self.lineMaxLength),
 				angle: angle,
 				width: self.lineWidth
 			};
-			var end = self.getLineEnd(line);
+			end = self.getLineEnd(line);
 			if(end.y>=topY && end.y<=bottomY) {
 				if(draw) {
 					self.drawLine(line);
@@ -94,12 +94,11 @@ var scenery_despair = function(parent) {
 		for(var i=0; i<lineLength; i++) {
 			var x = Math.round(line.x+(end.x-line.x)*i/lineLength);
 			var y = Math.round(line.y+(end.y-line.y)*i/lineLength);
-			self.set(x, y, 1);
-
 			for(var k=0; k<widthLineLength; k++) {
 				var wx = Math.round(x+((widthEnd.x+x)-x)*k/widthLineLength);
 				var wy = Math.round(y+((widthEnd.y+y)-y)*k/widthLineLength);
 				self.set(wx, wy, 1);
+				self.set(wx+1, wy, 1); // Dirty fix: Some lines won't get filled out properly. This takes care of that.
 			}
 		}
 	};

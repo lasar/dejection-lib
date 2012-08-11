@@ -17,10 +17,13 @@ var agonist = function(parent) {
 
 	self.speedX = 0;
 	self.speedY = 0;
+	self.targetSpeedX = 0;
+	self.targetSpeedY = 0;
 
 	self.stepsX = 0;
 	self.stepsY = 0;
 
+	self.mass = 1;
 	self.gravity = .098 * 2;
 	self.maxFallingSpeed = 10;
 
@@ -105,7 +108,7 @@ var agonist = function(parent) {
 
 	self.remove = function() {
 		self.parent.removeAgonist(self.index);
-	}
+	};
 
 	self.move = function(x, y) {
 		var x = self.x;
@@ -115,12 +118,29 @@ var agonist = function(parent) {
 
 		self.speedX = Math.round(self.speedX);
 
-		self.stepsY++;
-		self.speedY = 1/2 * self.gravity * self.stepsY*self.stepsY;
-		if(self.speedY>self.maxFallingSpeed) {
-			self.speedY = self.maxFallingSpeed;
+		if(self.speedX<self.targetSpeedX) {
+			self.speedX++;
+		} else if(self.speedX>self.targetSpeedX) {
+			self.speedX--;
 		}
-		self.speedY = Math.round(self.speedY);
+
+		self.stepsY++;
+		// if(self.speedY<self.targetSpeedY) {
+		// 	self.speedY++;
+		// }
+		if(self.mass>0) {
+			self.targetSpeedY = 1/2 * self.gravity * self.stepsY*self.stepsY;
+			if(self.targetSpeedY>self.maxFallingSpeed) {
+				self.targetSpeedY = self.maxFallingSpeed;
+			}
+			self.targetSpeedY = Math.round(self.targetSpeedY);
+		}
+
+		if(self.speedY<self.targetSpeedY) {
+			self.speedY++;
+		} else if(self.speedY>self.targetSpeedY) {
+			self.speedY--;
+		}
 
 		dx += self.speedX;
 		dy += self.speedY;
@@ -138,17 +158,23 @@ var agonist = function(parent) {
 					}
 				}
 			}
+			// When still collided, move up
+			if(self.isCollision(self.mask, self.x, self.y)) {
+				self.y--;
+			}
 		} else {
 			self.x += dx;
 			self.y += dy;
 		}
-	}
+	};
 
 	self.moveStep = function(mx, my) {
+		var destinationX = self.x + mx;
+		var destinationY = self.y + my;
 		if(mx!=0) {
 			if(self.isCollision(self.mask, self.x+mx, self.y)) {
-				if(self.speedY<2 && !self.isCollision(self.mask, self.x+mx, self.y-2)) {
-					self.y -= 2;
+				if(!self.isCollision(self.mask, self.x+mx, self.y-3)) {
+					self.y -= 3;
 					return self.moveStep(mx, my);
 				} else {
 					self.stopX();
@@ -177,7 +203,7 @@ var agonist = function(parent) {
 				}
 			}
 		});
-		return collisionCount>self.collisionToleranceFactor;
+		return collisionCount>self.mass;
 	}
 
 	self.stopY = function() {
@@ -188,6 +214,7 @@ var agonist = function(parent) {
 	self.stopX = function() {
 		self.stepsX = 0;
 		self.speedX = 0;
+		self.targetSpeedX = 0;
 	}
 
 	self.kill = function() {

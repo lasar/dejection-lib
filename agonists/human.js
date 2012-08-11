@@ -43,6 +43,7 @@ var agonist_human = function(parent) {
 	self.setBitmap(humanBitmap, humanMask);
 
 	self.xCollisionCount = 0;
+	self.jumpProbability = 0;
 
 	self.setup = function(options) {
 		self.setupBase(options);
@@ -54,19 +55,20 @@ var agonist_human = function(parent) {
 			self.y = self.height*self.rnd(1,2)*-1;
 		}
 
-		self.speedX = self.getSpeedX() * [1,-1][self.rnd(0,1)];
+		self.targetSpeedX = self.getSpeedX() * [1,-1][self.rnd(0,1)];
 	};
 
 	self.stopX = function() {
 		self.stepsX = 0;
-		self.speedX = 0;
+		self.targetSpeedX = 0;
 		if(self.xCollisionCount<1) {
 			self.xCollisionCount++;
-			self.speedX = self.getSpeedX();
+			self.targetSpeedX = self.getSpeedX();
+			if(self.rnd(0,self.jumpProbability)==0) {
+				self.jump();
+			}
 		} else {
-			self.speedX = self.getSpeedX() * -1;
-			self.xCollisionCount = 0;
-			self.x += self.speedX;
+			self.turnAround();
 		}
 	}
 
@@ -77,6 +79,16 @@ var agonist_human = function(parent) {
 
 	self.getSpeedX = function() {
 		return self.rnd(1, 2);
+	}
+
+	self.jump = function() {
+		self.speedY = -5;
+	}
+
+	self.turnAround = function() {
+		self.targetSpeedX = self.getSpeedX() * -1;
+		self.xCollisionCount = 0;
+		self.x += self.targetSpeedX;
 	}
 
 	return self;
