@@ -21,7 +21,6 @@ var dejection = function(config) {
 		renderer: 'function',
 		scenery: 'function',
 		agonists: 'object',
-		physics: 'function',
 		randomAgonists: 'object',
 	};
 	self.agonists = {};

@@ -15,6 +15,22 @@ var agonist = function(parent) {
 	self.x = -1;
 	self.y = -1;
 
+	self.speedX = 0;
+	self.speedY = 0;
+
+	self.dirX = 1;
+	self.dirY = 1;
+
+	self.stepsX = 0;
+	self.stepsY = 0;
+
+	self.gravity = .098 * 2;
+	self.maxFallingSpeed = 10;
+
+	self.collisionToleranceFactor = 0;
+
+	self.corporeal = true;
+
 	self.setBitmap = function(bitmap, mask) {
 		self.mask = mask;
 		self.bitmap = [];
@@ -52,7 +68,6 @@ var agonist = function(parent) {
 				self.y = options.y;
 			}
 		}
-		self.physics = self.parent.config.physics(self);
 	};
 
 	self.setup = function(options) {
@@ -82,7 +97,7 @@ var agonist = function(parent) {
 	}
 
 	self.stepEnd = function() {
-		self.physics.move();
+		self.move();
 	}
 
 	self.step = function() {
@@ -94,19 +109,96 @@ var agonist = function(parent) {
 	}
 
 	self.move = function(x, y) {
-		var ok = true;
-		while(ok) {
-			y--;
-			self.y++;
-			if(y<0) {
-				ok = false;
+		// var ok = true;
+		// while(ok) {
+		// 	y--;
+		// 	self.y++;
+		// 	if(y<0) {
+		// 		ok = false;
+		// 	}
+		// }
+
+		var x = self.x;
+		var y = self.y;
+		var dx = 0;
+		var dy = 0;
+
+		self.speedX = Math.round(self.speedX);
+
+		self.stepsY++;
+		self.speedY = 1/2 * self.gravity * self.stepsY*self.stepsY;
+		if(self.speedY>self.maxFallingSpeed) {
+			self.speedY = self.maxFallingSpeed;
+		}
+		self.speedY = Math.round(self.speedY);
+
+		dx += self.speedX;
+		dy += self.speedY;
+
+		if(self.corporeal) {
+			for(var f=0; f<=(dx>dy?dx:dy); f++) {
+				if(f<dx) {
+					if(!self.moveStep(1, 0)) {
+						dx = f;
+					}
+				}
+				if(f<dy) {
+					if(!self.moveStep(0, 1)) {
+						dy = f;
+					}
+				}
 			}
+		} else {
+			self.x += dx;
+			self.y += dy;
 		}
 	}
 
-	self.stopX = function() {}
+	self.moveStep = function(mx, my) {
+		if(mx>0) {
+			if(self.isCollision(self.mask, self.x+mx, self.y)) {
+				if(self.speedY<2 && !self.isCollision(self.mask, self.x+mx, self.y-2)) {
+					self.y -= 2;
+					return self.moveStep(mx, my);
+				} else {
+					self.stopX();
+					return false;
+				}
+			}
+		}
+		if(my>0) {
+			if(self.isCollision(self.mask, self.x+mx, self.y+my)) {
+				self.stopY();
+				return false;
+			}
+		}
+		self.x += (mx * self.dirX);
+		self.y += (my * self.dirY);
+		return true;
+	};
 
-	self.stopY = function() {}
+	self.isCollision = function(mask, x, y) {
+		var collisionCount = 0;
+		var scenery = self.getBitmapSlice(self.parent.scenery.pxMask, x, y, mask[0].length, mask.length);
+		self.xyLoop(mask, function(bx, by, val) {
+			if(typeof(scenery[by])!='undefined' && typeof(scenery[by][bx])!='undefined') {
+				if(val==1 && scenery[by][bx]==1) {
+					collisionCount++;
+				}
+			}
+		});
+		return collisionCount>self.collisionToleranceFactor;
+	}
+
+	self.stopY = function() {
+		self.stepsY = 0;
+		self.speedY = 0;
+	}
+
+	self.stopX = function() {
+		self.stepsX = 0;
+		self.speedX = 0;
+	}
 
 	self.kill = function() {
 		self.dying = true;
