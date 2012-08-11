@@ -361,7 +361,7 @@ var renderer_browserCanvas = function(parent) {
 
 	self.addAgonist = function(agonist) {
 		self.addBitmap(agonist.getBitmap(), Math.round(agonist.x), Math.round(agonist.y));
-		// self.debug && self.write(agonist.x+agonist.width+2, agonist.y+agonist.height-self.text.charHeight, agonist.speedX+'x'+agonist.dirX+'/'+agonist.speedY+'x'+agonist.dirY, {r:255, g:0, b:0, a:255});
+		// self.debug && self.write(agonist.x+agonist.width+2, agonist.y+agonist.height-self.text.charHeight, agonist.speedX+'/'+agonist.speedY, {r:255, g:0, b:0, a:255});
 	}
 
 	self.toggle = function(x, y) {

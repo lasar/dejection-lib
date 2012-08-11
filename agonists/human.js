@@ -54,20 +54,19 @@ var agonist_human = function(parent) {
 			self.y = self.height*self.rnd(1,2)*-1;
 		}
 
-		self.speedX = self.getSpeedX();
-		self.dirX = [1,-1][self.rnd(0,1)];
+		self.speedX = self.getSpeedX() * [1,-1][self.rnd(0,1)];
 	};
 
 	self.stopX = function() {
+		self.stepsX = 0;
+		self.speedX = 0;
 		if(self.xCollisionCount<1) {
 			self.xCollisionCount++;
 			self.speedX = self.getSpeedX();
 		} else {
-			self.dirX = self.dirX * -1;
-			self.speedX = self.getSpeedX();
+			self.speedX = self.getSpeedX() * -1;
 			self.xCollisionCount = 0;
-			// self.y -= 1;
-			self.x += self.dirX;
+			self.x += self.speedX;
 		}
 	}
 

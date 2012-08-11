@@ -18,9 +18,6 @@ var agonist = function(parent) {
 	self.speedX = 0;
 	self.speedY = 0;
 
-	self.dirX = 1;
-	self.dirY = 1;
-
 	self.stepsX = 0;
 	self.stepsY = 0;
 
@@ -101,7 +98,9 @@ var agonist = function(parent) {
 	}
 
 	self.step = function() {
+		self.stepStart();
 		self.log('agonist.step: Not overridden');
+		self.stepEnd();
 	};
 
 	self.remove = function() {
@@ -109,15 +108,6 @@ var agonist = function(parent) {
 	}
 
 	self.move = function(x, y) {
-		// var ok = true;
-		// while(ok) {
-		// 	y--;
-		// 	self.y++;
-		// 	if(y<0) {
-		// 		ok = false;
-		// 	}
-		// }
-
 		var x = self.x;
 		var y = self.y;
 		var dx = 0;
@@ -136,15 +126,15 @@ var agonist = function(parent) {
 		dy += self.speedY;
 
 		if(self.corporeal) {
-			for(var f=0; f<=(dx>dy?dx:dy); f++) {
-				if(f<dx) {
-					if(!self.moveStep(1, 0)) {
-						dx = f;
+			for(var f=0; f<=(Math.abs(dx)>Math.abs(dy)?Math.abs(dx):Math.abs(dy)); f++) {
+				if(f<Math.abs(dx)) {
+					if(!self.moveStep(dx>0?1:-1, 0)) {
+						dx = f; // Abort. pos/neg does not matter.
 					}
 				}
-				if(f<dy) {
-					if(!self.moveStep(0, 1)) {
-						dy = f;
+				if(f<Math.abs(dy)) {
+					if(!self.moveStep(0, dy>0?1:-1)) {
+						dy = f; // Abort. pos/neg does not matter.
 					}
 				}
 			}
@@ -155,7 +145,7 @@ var agonist = function(parent) {
 	}
 
 	self.moveStep = function(mx, my) {
-		if(mx>0) {
+		if(mx!=0) {
 			if(self.isCollision(self.mask, self.x+mx, self.y)) {
 				if(self.speedY<2 && !self.isCollision(self.mask, self.x+mx, self.y-2)) {
 					self.y -= 2;
@@ -166,14 +156,14 @@ var agonist = function(parent) {
 				}
 			}
 		}
-		if(my>0) {
+		if(my!=0) {
 			if(self.isCollision(self.mask, self.x+mx, self.y+my)) {
 				self.stopY();
 				return false;
 			}
 		}
-		self.x += (mx * self.dirX);
-		self.y += (my * self.dirY);
+		self.x += mx;
+		self.y += my;
 		return true;
 	};
 
