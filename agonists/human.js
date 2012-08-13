@@ -42,6 +42,10 @@ var agonist_human = function(parent) {
 
 	self.setBitmap(humanBitmap, humanMask);
 
+	self.avoidCollision = true;
+
+	self.vincible = true;
+
 	self.xCollisionCount = 0;
 	self.jumpProbability = 0;
 

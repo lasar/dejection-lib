@@ -7,6 +7,9 @@ var agonist = function(parent) {
 	self.mask = [];
 
 	self.lifetime = 0;
+	self.vincible = true;
+	self.health = 100;
+	self.agingFactor
 	// self.dying = false;
 	// self.deathSteps = 10;
 	// self.deathStep = 0;
@@ -27,9 +30,8 @@ var agonist = function(parent) {
 	self.gravity = .098 * 2;
 	self.maxFallingSpeed = 10;
 
-	self.collisionToleranceFactor = 0;
-
 	self.corporeal = true;
+	self.avoidCollision = false;
 
 	self.setBitmap = function(bitmap, mask) {
 		self.mask = mask;
@@ -88,6 +90,11 @@ var agonist = function(parent) {
 		}
 
 		self.lifetime++;
+
+		if(self.health<1) {
+			// TODO: Proper things!
+			self.remove();
+		}
 
 		// Agonist is dying
 		// self.dying && self.deathStep++;
@@ -158,9 +165,26 @@ var agonist = function(parent) {
 					}
 				}
 			}
-			// When still collided, move up
-			if(self.isCollision(self.mask, self.x, self.y)) {
-				self.y--;
+			// When still collided, find nearest available space, move in that direction
+			if(self.avoidCollision && self.isCollision(self.mask, self.x, self.y)) {
+				var freeSpaceDistance = 0;
+				var foundSpace = false;
+				while(!foundSpace) {
+					freeSpaceDistance++;
+					if(!self.isCollision(self.mask, self.x+freeSpaceDistance, self.y, true)) {
+						self.x += 1;
+						foundSpace = true;
+					} else if(!self.isCollision(self.mask, self.x-freeSpaceDistance, self.y, true)) {
+						self.x -= 1;
+						foundSpace = true;
+					} else if(!self.isCollision(self.mask, self.x, self.y+freeSpaceDistance, true)) {
+						self.y += 1;
+						foundSpace = true;
+					} else if(!self.isCollision(self.mask, self.x, self.y-freeSpaceDistance, true)) {
+						self.y -= 1;
+						foundSpace = true;
+					}
+				}
 			}
 		} else {
 			self.x += dx;
@@ -173,7 +197,7 @@ var agonist = function(parent) {
 		var destinationY = self.y + my;
 		if(mx!=0) {
 			if(self.isCollision(self.mask, self.x+mx, self.y)) {
-				if(!self.isCollision(self.mask, self.x+mx, self.y-3)) {
+				if(self.avoidCollision && !self.isCollision(self.mask, self.x+mx, self.y-3)) {
 					self.y -= 3;
 					return self.moveStep(mx, my);
 				} else {
@@ -193,7 +217,7 @@ var agonist = function(parent) {
 		return true;
 	};
 
-	self.isCollision = function(mask, x, y) {
+	self.isCollision = function(mask, x, y, ignoreMass) {
 		var collisionCount = 0;
 		var scenery = self.getBitmapSlice(self.parent.scenery.pxMask, x, y, mask[0].length, mask.length);
 		self.xyLoop(mask, function(bx, by, val) {
@@ -203,8 +227,23 @@ var agonist = function(parent) {
 				}
 			}
 		});
-		return collisionCount>self.mass;
+		if(ignoreMass) {
+			return collisionCount>0;
+		} else {
+			return collisionCount>self.mass;
+		}
 	}
+
+	self.findIntersectingAgonists = function(x, y, w, h) {
+		var intersecting = [];
+		for (var a in self.parent.agonists) {
+			var agonist = self.parent.agonists[a];
+			if(agonist.index!=self.index) {
+				// TODO: Do something here!
+			}
+		}
+		return intersecting;
+	};
 
 	self.stopY = function() {
 		self.stepsY = 0;
@@ -216,6 +255,10 @@ var agonist = function(parent) {
 		self.speedX = 0;
 		self.targetSpeedX = 0;
 	}
+
+	self.hurt = function(amount) {
+		self.health -= amount;
+	};
 
 	self.kill = function() {
 		self.dying = true;
