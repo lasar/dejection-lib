@@ -37,7 +37,9 @@ var scenery_lines = function(parent) {
 				var wx = Math.round(x+((widthEnd.x+x)-x)*k/widthLineLength);
 				var wy = Math.round(y+((widthEnd.y+y)-y)*k/widthLineLength);
 				self.set(wx, wy, 1);
-				self.set(wx+1, wy, 1); // Dirty fix: Some lines won't get filled out properly. This takes care of that.
+				if(line.width>1) {
+					self.set(wx+1, wy, 1); // Dirty fix: Some lines won't get filled out properly. This takes care of that.
+				}
 			}
 		}
 	};
