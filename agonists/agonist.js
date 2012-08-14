@@ -11,7 +11,7 @@ var agonist = function(parent) {
 	self.deathtime = 0;
 	self.maxDeathtime = 0;
 	self.mortal = false;
-	self.vincible = true;
+	self.vincible = false;
 	self.health = 100;
 	self.dying = false;
 
@@ -100,7 +100,7 @@ var agonist = function(parent) {
 			self.deathtime++;
 		}
 
-		if(!self.dying && self.health<1) {
+		if(self.vincible && !self.dying && self.health<1) {
 			self.kill();
 		}
 
