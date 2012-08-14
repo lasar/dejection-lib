@@ -15,6 +15,9 @@ var scenery_chamber = function(parent) {
 		self.drawRect({x: 400, y: 80, w: 5, h: 20});
 		self.drawRect({x: 545, y: 80, w: 5, h: 20});
 
+		self.drawRect({x: 400, y: 200, w: 60, h: 5});
+		self.drawRect({x: 400, y: 180, w: 5, h: 20});
+		self.drawRect({x: 455, y: 180, w: 5, h: 20});
 	}
 
 
