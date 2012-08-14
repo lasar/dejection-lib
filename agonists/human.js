@@ -80,7 +80,6 @@ var agonist_human = function(parent) {
 
 	self.step = function() {
 		self.stepStart();
-		self.log(self.lifetime+'/'+self.deathtime);
 		self.stepEnd();
 	}
 
