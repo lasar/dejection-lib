@@ -39,7 +39,7 @@ var agonist_rock = function(parent) {
 		self.stepStart();
 		var hitAgonists = self.findIntersectingAgonists(self.x, self.y, self.width, self.height);
 		for(var a in hitAgonists) {
-			hitAgonists[a].hurt(self.mass * self.speedY);
+			hitAgonists[a].hurt(self.mass*self.speedY, self);
 		}
 		self.stepEnd();
 	}

@@ -45,6 +45,7 @@ var agonist_human = function(parent) {
 	self.avoidCollision = true;
 
 	self.vincible = true;
+	self.maxDeathtime = 20;
 
 	self.xCollisionCount = 0;
 	self.jumpProbability = 0;
@@ -59,6 +60,7 @@ var agonist_human = function(parent) {
 			self.y = self.height*self.rnd(1,2)*-1;
 		}
 
+		self.speedY = self.rnd(-5, 0);
 		self.targetSpeedX = self.getSpeedX() * [1,-1][self.rnd(0,1)];
 	};
 
@@ -78,6 +80,7 @@ var agonist_human = function(parent) {
 
 	self.step = function() {
 		self.stepStart();
+		self.log(self.lifetime+'/'+self.deathtime);
 		self.stepEnd();
 	}
 
@@ -93,6 +96,11 @@ var agonist_human = function(parent) {
 		self.targetSpeedX = self.getSpeedX() * -1;
 		self.xCollisionCount = 0;
 		self.x += self.targetSpeedX;
+	}
+
+	self.kill = function() {
+		self.dying = true;
+		self.corporeal = false;
 	}
 
 	return self;

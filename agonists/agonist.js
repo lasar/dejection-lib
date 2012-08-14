@@ -7,12 +7,12 @@ var agonist = function(parent) {
 	self.mask = [];
 
 	self.lifetime = 0;
+	self.maxLifetime = 0;
+	self.deathtime = 0;
+	self.maxDeathtime = 0;
 	self.vincible = true;
 	self.health = 100;
-	self.agingFactor
-	// self.dying = false;
-	// self.deathSteps = 10;
-	// self.deathStep = 0;
+	self.dying = false;
 
 	self.index;
 	self.x = -1;
@@ -91,16 +91,21 @@ var agonist = function(parent) {
 
 		self.lifetime++;
 
-		if(self.health<1) {
-			// TODO: Proper things!
-			self.remove();
+		if(self.dying) {
+			self.deathtime++;
 		}
 
-		// Agonist is dying
-		// self.dying && self.deathStep++;
-		// if(self.deathStep>self.deathSteps) {
-		// 	self.remove();
-		// }
+		if(!self.dying && (self.maxLifetime>0 && self.lifetime>=self.maxLifetime)) {
+			self.kill();
+		}
+
+		if(!self.dying && self.health<1) {
+			self.kill();
+		}
+
+		if(self.deathtime>=self.maxDeathtime) {
+			self.remove();
+		}
 	}
 
 	self.stepEnd = function() {
@@ -217,9 +222,11 @@ var agonist = function(parent) {
 		return true;
 	};
 
-	self.isCollision = function(mask, x, y, ignoreMass) {
+	self.isCollision = function(mask, x, y, ignoreMass, scenery) {
 		var collisionCount = 0;
-		var scenery = self.getBitmapSlice(self.parent.scenery.pxMask, x, y, mask[0].length, mask.length);
+		if(typeof(scenery)=='undefined') {
+			scenery = self.getBitmapSlice(self.parent.scenery.pxMask, x, y, mask[0].length, mask.length);
+		}
 		self.xyLoop(mask, function(bx, by, val) {
 			if(typeof(scenery[by])!='undefined' && typeof(scenery[by][bx])!='undefined') {
 				if(val==1 && scenery[by][bx]==1) {
@@ -236,10 +243,21 @@ var agonist = function(parent) {
 
 	self.findIntersectingAgonists = function(x, y, w, h) {
 		var intersecting = [];
+		var pseudoScenery = self.getBitmapSlice([], 0, 0, self.parent.config.width, self.parent.config.height);
+		self.xyLoop(self.mask, function(aX, aY, aVal) {
+			var x = self.x+aX;
+			var y = self.y+aY;
+			if(x>=0 && x<self.parent.config.width && y>=0 && y<self.parent.config.height) {
+				pseudoScenery[y][x] = aVal;
+			}
+		});
 		for (var a in self.parent.agonists) {
 			var agonist = self.parent.agonists[a];
 			if(agonist.index!=self.index) {
-				// TODO: Do something here!
+				if(self.isCollision(agonist.mask, agonist.x, agonist.y, true, self.getBitmapSlice(pseudoScenery, agonist.x, agonist.y, agonist.width, agonist.height))) {
+					intersecting.push(agonist);
+				}
+				
 			}
 		}
 		return intersecting;
@@ -256,8 +274,11 @@ var agonist = function(parent) {
 		self.targetSpeedX = 0;
 	}
 
-	self.hurt = function(amount) {
-		self.health -= amount;
+	self.hurt = function(amount, by) {
+		if(self.vincible) {
+			self.health -= amount;
+			// self.log('agonist '+agonist.name+'/'+agonist.index+' hurt '+amount+' by '+by.name+'/'+by.index+', new health: '+self.health);
+		}
 	};
 
 	self.kill = function() {
