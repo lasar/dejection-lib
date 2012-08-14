@@ -54,14 +54,14 @@ var scenery = function(parent) {
 		self.log('scenery.generate: Not overridden');
 	};
 
-	self.addBitmap = function(bitmapMask, bitmap, left, top) {
+	self.addBitmap = function(bitmapMask, bitmap, left, top, opaque) {
 		var width = bitmapMask[0].length;
 		var height = bitmapMask.length;
 		for(x=0; x<width; x++) {
 			for(y=0; y<height; y++) {
 				p = bitmapMask[y][x];
-				if(p) {
-					self.set(left+x, top+y, 1, bitmap[y][x]);
+				if(p || opaque) {
+					self.set(left+x, top+y, bitmapMask[y][x], bitmap[y][x]);
 				}
 			}
 		}

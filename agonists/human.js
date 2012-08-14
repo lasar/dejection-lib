@@ -45,7 +45,8 @@ var agonist_human = function(parent) {
 	self.avoidCollision = true;
 
 	self.vincible = true;
-	self.maxDeathtime = 20;
+	self.mortal = true;
+	self.maxDeathtime = 5;
 
 	self.xCollisionCount = 0;
 	self.jumpProbability = 0;
@@ -80,6 +81,21 @@ var agonist_human = function(parent) {
 
 	self.step = function() {
 		self.stepStart();
+
+		// Temporary: Warp bitmap while dying. Later to be replaced by proper bitmaps.
+		if(self.deathtime>0) {
+			var cutLines = 2;
+			var newBitmap = [];
+			for(var y=0; y<self.height; y++) {
+				newBitmap[y] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+			}
+			self.yLoop(self.bitmap, function(y, v) {
+				var newY = Math.round(y/self.height*(self.height-cutLines))+cutLines;
+				newBitmap[newY] = v;
+			});
+			self.setBitmap(newBitmap, humanMask);
+		}
+
 		self.stepEnd();
 	}
 
@@ -99,6 +115,7 @@ var agonist_human = function(parent) {
 
 	self.kill = function() {
 		self.dying = true;
+		self.parent.deathCount++;
 		self.corporeal = false;
 	}
 

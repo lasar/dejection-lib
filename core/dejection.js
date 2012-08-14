@@ -26,6 +26,7 @@ var dejection = function(config) {
 	self.agonists = {};
 	self.agonistIndex = 0;
 	self.agonistCount = 0;
+	self.deathCount = 0;
 	self.stepInProgress = false;
 	self.renderInProgress = false;
 

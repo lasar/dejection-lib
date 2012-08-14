@@ -10,6 +10,7 @@ var agonist = function(parent) {
 	self.maxLifetime = 0;
 	self.deathtime = 0;
 	self.maxDeathtime = 0;
+	self.mortal = false;
 	self.vincible = true;
 	self.health = 100;
 	self.dying = false;
@@ -91,20 +92,20 @@ var agonist = function(parent) {
 
 		self.lifetime++;
 
-		if(self.dying) {
-			self.deathtime++;
-		}
-
 		if(!self.dying && (self.maxLifetime>0 && self.lifetime>=self.maxLifetime)) {
 			self.kill();
+		}
+
+		if(self.dying) {
+			self.deathtime++;
 		}
 
 		if(!self.dying && self.health<1) {
 			self.kill();
 		}
 
-		if(self.deathtime>=self.maxDeathtime) {
-			self.remove();
+		if(self.dying && self.deathtime>=self.maxDeathtime) {
+			self.dead();
 		}
 	}
 
@@ -277,12 +278,19 @@ var agonist = function(parent) {
 	self.hurt = function(amount, by) {
 		if(self.vincible) {
 			self.health -= amount;
-			// self.log('agonist '+agonist.name+'/'+agonist.index+' hurt '+amount+' by '+by.name+'/'+by.index+', new health: '+self.health);
+			self.log('agonist '+self.name+'/'+self.index+' hurt '+amount+' by '+by.name+'/'+by.index+', new health: '+self.health);
 		}
 	};
 
 	self.kill = function() {
 		self.dying = true;
+		if(self.mortal) {
+			self.parent.deathCount++;
+		}
+	}
+
+	self.dead = function() {
+		self.remove();
 	}
 
 	self.toScenery = function() {
