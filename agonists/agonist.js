@@ -225,6 +225,7 @@ var agonist = function(parent) {
 
 	self.isCollision = function(mask, x, y, ignoreMass, scenery) {
 		var collisionCount = 0;
+		var collisionTolerance = ignoreMass ? 1 : self.mass;
 		if(typeof(scenery)=='undefined') {
 			scenery = self.getBitmapSlice(self.parent.scenery.pxMask, x, y, mask[0].length, mask.length);
 		}
@@ -232,14 +233,13 @@ var agonist = function(parent) {
 			if(typeof(scenery[by])!='undefined' && typeof(scenery[by][bx])!='undefined') {
 				if(val==1 && scenery[by][bx]==1) {
 					collisionCount++;
+					if(collisionCount>collisionTolerance) {
+						return true;
+					}
 				}
 			}
 		});
-		if(ignoreMass) {
-			return collisionCount>0;
-		} else {
-			return collisionCount>self.mass;
-		}
+		return collisionCount>collisionTolerance;
 	}
 
 	self.findIntersectingAgonists = function(x, y, w, h) {
