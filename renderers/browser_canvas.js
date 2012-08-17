@@ -317,16 +317,12 @@ var renderer_browserCanvas = function(parent) {
 		self.ctx.putImageData(self.imageData, 0, 0);
 	};
 
-	self.addToChangeCache = function(x, y, w, h, lifetime) {
-		if(lifetime=='undefined') {
-			lifetime = 1;
-		}
+	self.addToChangeCache = function(x, y, w, h) {
 		self.changeCache.push({
 			x: x-10,
 			y: y-10,
 			width: w+20,
-			height: h+20,
-			lifetime: lifetime
+			height: h+20
 		});
 	};
 
@@ -337,12 +333,8 @@ var renderer_browserCanvas = function(parent) {
 	self.changeCacheLoop = function(callback) {
 		for(var c in self.changeCache) {
 			callback(self.changeCache[c]);
-			self.changeCache[c].lifetime--;
-			if(self.changeCache[c].lifetime<1) {
-				delete(self.changeCache[c]);
-			}
+			delete(self.changeCache[c]);
 		}
-		
 	};
 
 	self.addBitmap = function(bitmap, left, top, color) {
