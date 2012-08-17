@@ -52,5 +52,28 @@ var scenery_lines = function(parent) {
 		}
 	};
 
+	self.drawCircle = function(circle) {
+		var radius = Math.round(circle.w/2);
+		var xCenter = circle.x+radius;
+		var yCenter = circle.y+radius;
+		var steps = circle.w*3;
+		var x, y;
+		for (var i = 0; i < steps; i++) {
+		    x = Math.round(xCenter + radius * Math.cos(2 * Math.PI * i / steps));
+		    y = Math.round(yCenter + radius * Math.sin(2 * Math.PI * i / steps));
+			if(x>xCenter) {
+				self.log('a');
+				for(xc=xCenter; xc<=x; xc++) {
+					self.set(xc, y, 1);
+				}
+			} else if(x<xCenter) {
+				self.log('b');
+				for(xc=x; xc<=xCenter; xc++) {
+					self.set(xc, y, 1);
+				}
+			}
+		}
+	};
+
 	return self;
 };
