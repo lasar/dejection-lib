@@ -262,7 +262,9 @@ var renderer_browserCanvas = function(parent) {
 		}
 	};
 
-	self.changeCache = [];
+	self.changeCacheBlockSize = 20; // Pixels
+	self.changeCacheSize = 0; // Statistics only
+	self.changeCache = []; // Matrix
 
 	self.checkEnv = function() {
 		if(typeof(jQuery)=='undefined') {
@@ -285,6 +287,8 @@ var renderer_browserCanvas = function(parent) {
 			self.debug = true;
 		}
 
+		self.changeCache = self.getBitmapSlice([], 0, 0, Math.floor(self.parent.config.width/self.changeCacheBlockSize), Math.floor(self.parent.config.height/self.changeCacheBlockSize));
+
 		self.canvas = jQuery('<canvas />').attr({
 			width: self.parent.config.width,
 			height: self.parent.config.height,
@@ -296,18 +300,24 @@ var renderer_browserCanvas = function(parent) {
 	};
 
 	self.reset = function() {
-		self.resetChangeCache();
 		self.addToChangeCache(0, 0, self.parent.config.width, self.parent.config.height);
 	};
 
 	self.render = function() {
-		self.changeCacheLoop(function(change) {
-			self.parent.scenery.loop(function(x, y, mask, color) {
-				self.set(x, y, color);
-			}, false, change.x, change.y, change.width, change.height);
-		});
+		self.changeCacheSize = 0;
+		self.xyLoop(self.changeCache, function(xc, yc, v) {
+			if(v) {
+				self.changeCacheSize++;
+				self.parent.scenery.loop(function(x, y, mask, color) {
+					self.set(x, y, color);
+				}, false, xc*self.changeCacheBlockSize, yc*self.changeCacheBlockSize, self.changeCacheBlockSize, self.changeCacheBlockSize);
 
-		self.resetChangeCache();
+				self.set(xc*self.changeCacheBlockSize,		(yc*self.changeCacheBlockSize),		{r:255, g:0, b:0, a:255});
+				self.changeCache[yc][xc] = 0; // Reset again
+			} else {
+				self.set(xc*self.changeCacheBlockSize,		(yc*self.changeCacheBlockSize),		{r:0, g:255, b:0, a:255});
+			}
+		});
 
 		// Agonists
 		for(var a in self.parent.agonists) {
@@ -318,22 +328,22 @@ var renderer_browserCanvas = function(parent) {
 	};
 
 	self.addToChangeCache = function(x, y, w, h) {
-		self.changeCache.push({
-			x: x-10,
-			y: y-10,
-			width: w+20,
-			height: h+20
-		});
-	};
-
-	self.resetChangeCache = function() {
-		self.changeCache = [];
-	};
-
-	self.changeCacheLoop = function(callback) {
-		for(var c in self.changeCache) {
-			callback(self.changeCache[c]);
-			delete(self.changeCache[c]);
+		// x -= self.changeCacheBlockSize;
+		// y -= self.changeCacheBlockSize;
+		// w += self.changeCacheBlockSize + self.changeCacheBlockSize;
+		// h += self.changeCacheBlockSize + self.changeCacheBlockSize;
+		var bx = x<0 ? 0 : Math.floor(x/self.changeCacheBlockSize);
+		var by = y<0 ? 0 : Math.floor(y/self.changeCacheBlockSize);
+		var bxw = (x+w)<0 ? 0 : Math.floor((x+w)/self.changeCacheBlockSize);
+		var byh = (y+h)<0 ? 0 : Math.floor((y+h)/self.changeCacheBlockSize);
+		bxw++;
+		byh++;
+		for(var xc=bx; xc<bxw; xc++) {
+			for(var yc=by; yc<byh; yc++) {
+				if(typeof(self.changeCache[yc])!='undefined' && typeof(self.changeCache[yc][xc])!='undefined') {
+					self.changeCache[yc][xc] = 1;
+				}
+			}
 		}
 	};
 
