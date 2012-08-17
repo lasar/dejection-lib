@@ -58,7 +58,7 @@ var scenery_lines = function(parent) {
 		var yCenter = circle.y+radius;
 		var steps = circle.w*3;
 		var x, y;
-		for (var i = 0; i < steps; i++) {
+		for (var i=0; i<steps; i++) {
 		    x = Math.round(xCenter + radius * Math.cos(2 * Math.PI * i / steps));
 		    y = Math.round(yCenter + radius * Math.sin(2 * Math.PI * i / steps));
 			if(x>xCenter) {
