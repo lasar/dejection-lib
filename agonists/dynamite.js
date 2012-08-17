@@ -100,17 +100,51 @@ var agonist_dynamite = function(parent) {
 
 		if(self.deathtime>0) {
 			var explosionFactor = 2;
-			var explosionRadius = self.width + (explosionFactor*2);
+			// var explosionRadius = self.width + (explosionFactor*2);
+			var explosionRadius = 30;
 			var explosion = [];
 			var explosionMask = [];
-			for(var ey=0; ey<explosionRadius; ey++) {
+			for(var ey=0; ey<explosionRadius*2; ey++) {
 				explosion[ey] = [];
 				explosionMask[ey] = [];
-				for(var ex=0; ex<explosionRadius; ex++) {
+				for(var ex=0; ex<explosionRadius*2; ex++) {
 					explosion[ey][ex] = 0;
-					explosionMask[ey][ex] = 1;
+					explosionMask[ey][ex] = 0;
 				}
 			}
+
+			self.log('explosionRadius '+explosionRadius);
+			self.log(explosion);
+			
+			var radius = explosionRadius-1;
+			var steps = radius*3;
+			var x, y;
+			for (var i=0; i<steps; i++) {
+			    x = Math.round(radius + radius * Math.cos(Math.PI * i / steps));
+			    y = Math.round(radius + radius * Math.sin(Math.PI * i / steps));
+				if(x>radius) {
+					for(xc=radius; xc<=x; xc++) {
+						self.log(x+'/'+y);
+						explosion[y][x] = 1;
+						explosionMask[y][x] = 1;
+					}
+				} else if(x<radius) {
+					for(xc=x; xc<=radius; xc++) {
+						self.log(x+'/'+y);
+						explosion[y][x] = 1;
+						explosionMask[y][x] = 1;
+					}
+				}
+			}
+
+			// for(var ey=0; ey<explosionRadius; ey++) {
+			// 	explosion[ey] = [];
+			// 	explosionMask[ey] = [];
+			// 	for(var ex=0; ex<explosionRadius; ex++) {
+			// 		explosion[ey][ex] = 0;
+			// 		explosionMask[ey][ex] = 1;
+			// 	}
+			// }
 			self.setBitmap(explosion.slice(0), explosionMask.slice(0));
 			self.x -= explosionFactor;
 			self.y -= explosionFactor;
