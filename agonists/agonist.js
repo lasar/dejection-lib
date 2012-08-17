@@ -244,6 +244,17 @@ var agonist = function(parent) {
 
 	self.findIntersectingAgonists = function(x, y, w, h) {
 		var intersecting = [];
+		for (var a in self.parent.agonists) {
+			var agonist = self.parent.agonists[a];
+			if(agonist.index!=self.index && (agonist.x+agonist.width>=self.x && agonist.x<=self.x+self.width && agonist.y+agonist.height>=self.y && agonist.y<=self.y+self.height)) {
+				intersecting.push(agonist);
+			}
+		}
+		return intersecting;
+	};
+
+	self.findIntersectingAgonists_SLOW = function(x, y, w, h) {
+		var intersecting = [];
 		var pseudoScenery = self.getBitmapSlice([], 0, 0, self.parent.config.width, self.parent.config.height);
 		self.xyLoop(self.mask, function(aX, aY, aVal) {
 			var x = self.x+aX;
@@ -258,7 +269,6 @@ var agonist = function(parent) {
 				if(self.isCollision(agonist.mask, agonist.x, agonist.y, true, self.getBitmapSlice(pseudoScenery, agonist.x, agonist.y, agonist.width, agonist.height))) {
 					intersecting.push(agonist);
 				}
-				
 			}
 		}
 		return intersecting;
