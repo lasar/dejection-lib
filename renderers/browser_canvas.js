@@ -265,6 +265,7 @@ var renderer_browserCanvas = function(parent) {
 	self.changeCacheBlockSize = 20; // Pixels
 	self.changeCacheSize = 0; // Statistics only
 	self.changeCache = []; // Matrix
+	self.debugChangeCache = false;
 
 	self.checkEnv = function() {
 		if(typeof(jQuery)=='undefined') {
@@ -311,10 +312,11 @@ var renderer_browserCanvas = function(parent) {
 				self.parent.scenery.loop(function(x, y, mask, color) {
 					self.set(x, y, color);
 				}, false, xc*self.changeCacheBlockSize, yc*self.changeCacheBlockSize, self.changeCacheBlockSize, self.changeCacheBlockSize);
-
-				self.set(xc*self.changeCacheBlockSize,		(yc*self.changeCacheBlockSize),		{r:255, g:0, b:0, a:255});
 				self.changeCache[yc][xc] = 0; // Reset again
-			} else {
+				if(self.debugChangeCache) {
+					self.set(xc*self.changeCacheBlockSize,		(yc*self.changeCacheBlockSize),		{r:255, g:0, b:0, a:255});
+				}
+			} else if(self.debugChangeCache) {
 				self.set(xc*self.changeCacheBlockSize,		(yc*self.changeCacheBlockSize),		{r:0, g:255, b:0, a:255});
 			}
 		});
