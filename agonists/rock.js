@@ -23,7 +23,7 @@ var agonist_rock = function(parent) {
 
 	self.setBitmap(rockBitmap, rockBitmap);
 
-	self.mass = 10;
+	self.mass = 20;
 
 	self.setup = function(options) {
 		self.setupBase(options);
@@ -39,7 +39,7 @@ var agonist_rock = function(parent) {
 		self.stepStart();
 		var hitAgonists = self.findIntersectingAgonists(self.x, self.y, self.width, self.height);
 		for(var a in hitAgonists) {
-			hitAgonists[a].hurt(self.mass, self);
+			hitAgonists[a].hurt(self.mass*10, self);
 		}
 		self.stepEnd();
 	}
